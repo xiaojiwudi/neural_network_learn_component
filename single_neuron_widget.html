@@ -3,204 +3,363 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>梯度下降 · 交互演示</title>
+<title>单个神经元交互演示</title>
 <style>
-:root {
-  --bg: #ffffff; --bg2: #f5f4f0; --bg3: #eeedea;
-  --tx: #1a1a18; --tx2: #6b6a65;
-  --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.22);
-  --purple: #7F77DD; --teal: #1D9E75; --red: #E24B4A; --amber: #BA7517;
-  --bg-danger: #fcebeb; --tx-danger: #791f1f;
-  --r: 8px; --font: -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  --mono: 'Menlo','Monaco','Courier New',monospace;
-}
-@media (prefers-color-scheme:dark) {
+  /* ── 设计系统变量（亮色 / 暗色自动切换）── */
   :root {
-    --bg:#1c1c1a; --bg2:#262624; --bg3:#2e2e2c;
-    --tx:#eeecea; --tx2:#9c9a92;
-    --border:rgba(255,255,255,0.10); --border2:rgba(255,255,255,0.22);
-    --purple:#AFA9EC; --teal:#5DCAA5; --red:#F07070; --amber:#EF9F27;
-    --bg-danger:#2e0f0f; --tx-danger:#f09595;
+    --bg-primary:    #ffffff;
+    --bg-secondary:  #f5f4f0;
+    --bg-tertiary:   #eeedea;
+    --bg-info:       #e6f1fb;
+    --bg-success:    #e1f5ee;
+    --bg-warning:    #faeeda;
+    --bg-danger:     #fcebeb;
+    --text-primary:  #1a1a18;
+    --text-secondary:#6b6a65;
+    --text-info:     #0c447c;
+    --text-success:  #085041;
+    --text-warning:  #633806;
+    --text-danger:   #791f1f;
+    --border:        rgba(0,0,0,0.12);
+    --border-md:     rgba(0,0,0,0.22);
+    --purple-400:    #7F77DD;
+    --purple-200:    #AFA9EC;
+    --teal-400:      #1D9E75;
+    --teal-200:      #5DCAA5;
+    --amber-400:     #BA7517;
+    --radius-md:     8px;
+    --radius-lg:     12px;
+    --font:          -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono:     'Menlo', 'Monaco', 'Courier New', monospace;
   }
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--font);background:var(--bg);color:var(--tx);padding:28px 24px 36px;max-width:680px;margin:0 auto;}
-h1{font-size:17px;font-weight:500;margin-bottom:4px;}
-.sub{font-size:13px;color:var(--tx2);margin-bottom:20px;line-height:1.6;}
-canvas{display:block;width:100%;border-radius:var(--r);border:0.5px solid var(--border);margin-bottom:16px;}
-hr{border:none;border-top:0.5px solid var(--border);margin:18px 0;}
-.ctrl{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-.ctrl label{width:72px;font-size:12px;color:var(--tx2);flex-shrink:0;}
-.ctrl input[type=range]{flex:1;accent-color:var(--purple);cursor:pointer;}
-.ctrl .val{width:44px;text-align:right;font-size:13px;font-weight:500;font-family:var(--mono);color:var(--tx);}
-.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
-button{padding:6px 16px;font-size:13px;font-family:var(--font);border-radius:var(--r);border:0.5px solid var(--border2);background:var(--bg2);color:var(--tx);cursor:pointer;transition:all .15s;}
-button:hover{background:var(--bg3);}
-.info{margin-top:14px;padding:12px 14px;background:var(--bg2);border-radius:var(--r);border:0.5px solid var(--border);font-size:13px;color:var(--tx2);line-height:1.7;}
-.info strong{color:var(--tx);font-weight:500;}
-#step-info{font-size:13px;color:var(--tx2);margin-left:8px;line-height:32px;}
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-primary:    #1c1c1a;
+      --bg-secondary:  #242422;
+      --bg-tertiary:   #2a2a28;
+      --bg-info:       #0c2540;
+      --bg-success:    #042c1e;
+      --bg-warning:    #2e1c03;
+      --bg-danger:     #2e0f0f;
+      --text-primary:  #eeecea;
+      --text-secondary:#9c9a92;
+      --text-info:     #85b7eb;
+      --text-success:  #5dcaa5;
+      --text-warning:  #fac775;
+      --text-danger:   #f09595;
+      --border:        rgba(255,255,255,0.10);
+      --border-md:     rgba(255,255,255,0.20);
+      --purple-400:    #AFA9EC;
+      --purple-200:    #7F77DD;
+      --teal-400:      #5DCAA5;
+      --teal-200:      #1D9E75;
+      --amber-400:     #EF9F27;
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    padding: 24px 20px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    font-size: 17px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  /* ── SVG 容器 ── */
+  .svg-wrap {
+    width: 100%;
+    overflow: visible;
+    margin-bottom: 20px;
+  }
+
+  /* ── 控制面板 ── */
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 24px;
+  }
+  @media (max-width: 520px) {
+    .controls { grid-template-columns: 1fr; }
+  }
+
+  .ctrl {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .ctrl label {
+    width: 56px;
+    flex-shrink: 0;
+    font-size: 12px;
+  }
+  .ctrl input[type=range] {
+    flex: 1;
+    accent-color: var(--purple-400);
+    cursor: pointer;
+  }
+  .ctrl .val {
+    width: 44px;
+    text-align: right;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 13px;
+    font-family: var(--font-mono);
+  }
+
+  /* ── 激活函数按钮 ── */
+  .act-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .act-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .act-btns {
+    display: flex;
+    gap: 6px;
+  }
+  .act-btn {
+    padding: 5px 12px;
+    font-size: 12px;
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--border-md);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: var(--font);
+    transition: all .15s;
+  }
+  .act-btn.active {
+    background: var(--bg-info);
+    color: var(--text-info);
+    border-color: var(--border-md);
+    font-weight: 500;
+  }
+
+  /* ── 输出显示 ── */
+  .output-display {
+    text-align: center;
+  }
+  .output-display .out-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+  }
+  .output-display .out-val {
+    font-size: 32px;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    line-height: 1;
+  }
+
+  /* ── 公式框 ── */
+  .formula-box {
+    margin-top: 20px;
+    padding: 12px 16px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--border);
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+  }
+  .formula-box .formula-line {
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+    font-size: 12px;
+  }
+  strong { font-weight: 500; color: var(--text-primary); }
+
+  /* ── 分隔线 ── */
+  hr {
+    border: none;
+    border-top: 0.5px solid var(--border);
+    margin: 20px 0;
+  }
 </style>
 </head>
 <body>
-<h1>梯度下降 · 可视化</h1>
-<p class="sub">调整学习率，观察"小球"如何沿损失曲面滚向最低点。学习率太大会在最低点两侧反复横跳。</p>
 
-<canvas id="c" height="220"></canvas>
+<h1>单个人工神经元</h1>
+<p class="subtitle">拖动滑块调整输入、权重和偏置，观察输出如何变化。切换激活函数感受非线性的作用。</p>
 
-<div class="ctrl">
-  <label>学习率 η</label>
-  <input type="range" id="lr" min="0.01" max="0.99" step="0.01" value="0.15">
-  <span class="val" id="v-lr">0.15</span>
+<!-- SVG 示意图 -->
+<div class="svg-wrap">
+<svg width="100%" viewBox="0 0 640 190" role="img" aria-label="神经元示意图">
+  <title>神经元结构示意图</title>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <!-- 输入节点 x1 -->
+  <rect id="box-x1" x="40" y="52" width="72" height="38" rx="8"
+    fill="var(--bg-secondary)" stroke="var(--border-md)" stroke-width="0.5"/>
+  <text x="76" y="75" text-anchor="middle" font-size="14" font-weight="500" fill="var(--text-primary)" font-family="var(--font)">x₁</text>
+  <text id="lbl-x1v" x="76" y="88" text-anchor="middle" font-size="11" fill="var(--text-secondary)" font-family="var(--font-mono)">0.5</text>
+
+  <!-- 输入节点 x2 -->
+  <rect id="box-x2" x="40" y="110" width="72" height="38" rx="8"
+    fill="var(--bg-secondary)" stroke="var(--border-md)" stroke-width="0.5"/>
+  <text x="76" y="133" text-anchor="middle" font-size="14" font-weight="500" fill="var(--text-primary)" font-family="var(--font)">x₂</text>
+  <text id="lbl-x2v" x="76" y="146" text-anchor="middle" font-size="11" fill="var(--text-secondary)" font-family="var(--font-mono)">1.0</text>
+
+  <!-- 连接线 -->
+  <line x1="112" y1="72" x2="218" y2="98" stroke="var(--purple-400)" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="112" y1="128" x2="218" y2="102" stroke="var(--purple-400)" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- 权重标签 -->
+  <text id="lbl-w1" x="162" y="78" text-anchor="middle" font-size="11" fill="var(--purple-400)" font-family="var(--font-mono)">w₁=0.50</text>
+  <text id="lbl-w2" x="162" y="130" text-anchor="middle" font-size="11" fill="var(--purple-400)" font-family="var(--font-mono)">w₂=0.50</text>
+
+  <!-- 神经元圆 -->
+  <circle cx="268" cy="100" r="42"
+    fill="var(--bg-secondary)" stroke="var(--purple-400)" stroke-width="1.5"/>
+  <text id="lbl-z" x="268" y="92" text-anchor="middle" font-size="12" fill="var(--text-secondary)" font-family="var(--font-mono)">z = 0.75</text>
+  <text id="lbl-act" x="268" y="112" text-anchor="middle" font-size="13" font-weight="500" fill="var(--purple-400)" font-family="var(--font)">σ(z)</text>
+
+  <!-- 偏置标签 -->
+  <text id="lbl-b" x="268" y="160" text-anchor="middle" font-size="11" fill="var(--text-secondary)" font-family="var(--font-mono)">b = 0.25</text>
+
+  <!-- 输出线 -->
+  <line x1="310" y1="100" x2="400" y2="100" stroke="var(--teal-400)" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- 输出节点 -->
+  <rect x="400" y="78" width="88" height="44" rx="8"
+    fill="var(--bg-success)" stroke="var(--teal-400)" stroke-width="0.5"/>
+  <text x="444" y="97" text-anchor="middle" font-size="11" fill="var(--text-success)" font-family="var(--font)">output</text>
+  <text id="lbl-out-svg" x="444" y="114" text-anchor="middle" font-size="14" font-weight="500" fill="var(--text-success)" font-family="var(--font-mono)">0.679</text>
+
+  <!-- 图例文字 -->
+  <text x="76" y="42" text-anchor="middle" font-size="11" fill="var(--text-secondary)" font-family="var(--font)">输入</text>
+  <text x="268" y="44" text-anchor="middle" font-size="11" fill="var(--text-secondary)" font-family="var(--font)">神经元</text>
+  <text x="444" y="66" text-anchor="middle" font-size="11" fill="var(--text-secondary)" font-family="var(--font)">输出 a</text>
+</svg>
 </div>
-<div class="btn-row">
-  <button onclick="resetGD()">重置</button>
-  <button onclick="stepGD()">走一步 →</button>
-  <button onclick="runGD()">自动运行</button>
-  <span id="step-info"></span>
+
+<hr>
+
+<!-- 控制区 -->
+<div class="controls">
+  <div>
+    <div class="ctrl"><label>x₁</label><input type="range" id="x1" min="-2" max="2" step="0.1" value="0.5"><span class="val" id="v-x1">0.5</span></div>
+    <div class="ctrl" style="margin-top:10px"><label>x₂</label><input type="range" id="x2" min="-2" max="2" step="0.1" value="1.0"><span class="val" id="v-x2">1.0</span></div>
+    <div class="ctrl" style="margin-top:10px"><label>w₁</label><input type="range" id="w1" min="-2" max="2" step="0.1" value="0.5"><span class="val" id="v-w1">0.5</span></div>
+    <div class="ctrl" style="margin-top:10px"><label>w₂</label><input type="range" id="w2" min="-2" max="2" step="0.1" value="0.5"><span class="val" id="v-w2">0.5</span></div>
+    <div class="ctrl" style="margin-top:10px"><label>bias b</label><input type="range" id="bias" min="-2" max="2" step="0.1" value="0.25"><span class="val" id="v-b">0.25</span></div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px;">
+    <div class="act-section">
+      <div class="act-label">激活函数</div>
+      <div class="act-btns">
+        <button class="act-btn active" id="btn-sigmoid" onclick="setAct('sigmoid')">Sigmoid</button>
+        <button class="act-btn" id="btn-relu" onclick="setAct('relu')">ReLU</button>
+        <button class="act-btn" id="btn-tanh" onclick="setAct('tanh')">Tanh</button>
+      </div>
+    </div>
+    <div class="output-display">
+      <div class="out-label">输出 a = σ(z)</div>
+      <div class="out-val" id="out-big">0.679</div>
+    </div>
+  </div>
 </div>
 
-<div class="info">
-  <strong>梯度下降公式：</strong>w ← w − η · ∂L/∂w<br>
-  曲线为损失函数 L(w) = 0.8(w−1.5)² + 0.3，最小值在 w*=1.5。
-  切线（橙色）表示当前梯度，坡度越陡说明需要调整越多。
+<!-- 公式显示 -->
+<div class="formula-box" id="formula-box">
+  <div><strong>加权求和：</strong> <span class="formula-line" id="f-z">z = 0.50×0.5 + 0.50×1.0 + 0.25 = 0.75</span></div>
+  <div style="margin-top:6px"><strong>激活输出：</strong> <span class="formula-line" id="f-a">a = sigmoid(0.75) = 0.679</span></div>
 </div>
 
 <script>
-const canvas = document.getElementById('c');
-const ctx = canvas.getContext('2d');
-const isDark = matchMedia('(prefers-color-scheme:dark)').matches;
+let act = 'sigmoid';
 
-function resize(){
-  canvas.width = canvas.offsetWidth * devicePixelRatio;
-  canvas.height = 220 * devicePixelRatio;
-  ctx.scale(devicePixelRatio, devicePixelRatio);
-  draw();
+function sigmoid(z){ return 1 / (1 + Math.exp(-z)); }
+function relu(z){ return Math.max(0, z); }
+function tanh_(z){ return Math.tanh(z); }
+
+function applyAct(z){
+  if (act === 'sigmoid') return sigmoid(z);
+  if (act === 'relu')    return relu(z);
+  return tanh_(z);
 }
 
-const W = () => canvas.offsetWidth;
-const H = 220;
-const pL=72, pR=20, pT=24, pB=44;
-
-const col = {
-  axis: isDark?'rgba(255,255,255,0.12)':'rgba(0,0,0,0.10)',
-  curve: isDark?'#AFA9EC':'#534AB7',
-  ball: '#E24B4A',
-  trail: isDark?'rgba(224,75,74,0.30)':'rgba(224,75,74,0.22)',
-  tangent: isDark?'rgba(239,159,39,0.65)':'rgba(186,117,23,0.60)',
-  minLine: isDark?'rgba(93,202,165,0.45)':'rgba(15,110,86,0.40)',
-  text: isDark?'rgba(255,255,255,0.42)':'rgba(0,0,0,0.36)',
-  textMain: isDark?'rgba(255,255,255,0.72)':'rgba(0,0,0,0.68)',
-};
-
-function loss(w){ return 0.8*(w-1.5)*(w-1.5)+0.3; }
-function grad(w){ return 1.6*(w-1.5); }
-function wx(w){ return pL + (w+1)/5*(W()-pL-pR); }
-function ly(l){ return pT + (H-pT-pB)*(1 - l/4.5); }
-
-let state = {w:-2.8, trail:[], step:0, timer:null};
-
-function draw(){
-  const w2 = W(), h2 = H;
-  ctx.clearRect(0,0,w2,h2);
-
-  // axes
-  ctx.strokeStyle=col.axis; ctx.lineWidth=0.5;
-  ctx.beginPath(); ctx.moveTo(pL,pT); ctx.lineTo(pL,h2-pB); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(pL,h2-pB); ctx.lineTo(w2-pR,h2-pB); ctx.stroke();
-
-  // grid lines
-  [0.5,1,1.5,2,2.5,3].forEach(v=>{
-    const y=ly(v);
-    ctx.strokeStyle=col.axis; ctx.lineWidth=0.4;
-    ctx.beginPath(); ctx.moveTo(pL,y); ctx.lineTo(w2-pR,y); ctx.stroke();
-    ctx.fillStyle=col.text; ctx.font=`10px ${getComputedStyle(document.body).getPropertyValue('--mono')||'monospace'}`;
-    ctx.textAlign='right'; ctx.fillText(v.toFixed(1), pL-4, y+3);
+function setAct(a) {
+  act = a;
+  ['sigmoid','relu','tanh'].forEach(k => {
+    document.getElementById('btn-' + k).classList.toggle('active', k === a);
   });
-
-  // min line
-  ctx.strokeStyle=col.minLine; ctx.lineWidth=1; ctx.setLineDash([4,4]);
-  ctx.beginPath(); ctx.moveTo(wx(1.5),pT); ctx.lineTo(wx(1.5),h2-pB); ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.fillStyle=col.text; ctx.font='10px sans-serif'; ctx.textAlign='left';
-  ctx.fillText('w*=1.5', wx(1.5)+4, pT+12);
-
-  // labels
-  ctx.fillStyle=col.text; ctx.font='11px sans-serif';
-  ctx.textAlign='right'; ctx.fillText('L(w)', pL-4, pT+10);
-  ctx.textAlign='center'; ctx.fillText('w（参数）', pL+(w2-pL-pR)/2, h2-4);
-
-  // loss curve
-  ctx.strokeStyle=col.curve; ctx.lineWidth=2;
-  ctx.beginPath();
-  for(let i=0;i<=200;i++){
-    const w=-1+i*5/200;
-    const x=wx(w), y=ly(loss(w));
-    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-  }
-  ctx.stroke();
-
-  // trail
-  if(state.trail.length>1){
-    ctx.strokeStyle=col.trail; ctx.lineWidth=1.5;
-    ctx.beginPath();
-    state.trail.forEach((pt,i)=>{
-      const x=wx(pt.w), y=ly(pt.l);
-      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-    });
-    ctx.stroke();
-  }
-
-  // tangent
-  const bx=wx(state.w), by=ly(loss(state.w));
-  const g=grad(state.w), scale=(w2-pL-pR)/5;
-  ctx.strokeStyle=col.tangent; ctx.lineWidth=1.5; ctx.setLineDash([5,3]);
-  ctx.beginPath(); ctx.moveTo(bx-50, by-g*(-50/scale*(5/1))*0.4); ctx.lineTo(bx+50, by+g*(50/scale*(5/1))*0.4); ctx.stroke();
-  ctx.setLineDash([]);
-
-  // ball
-  ctx.fillStyle=col.ball;
-  ctx.beginPath(); ctx.arc(bx, by, 8, 0, Math.PI*2); ctx.fill();
-
-  // status text
-  ctx.fillStyle=col.textMain; ctx.font='12px sans-serif'; ctx.textAlign='left';
-  ctx.fillText(`w=${state.w.toFixed(3)}   L=${loss(state.w).toFixed(3)}   grad=${grad(state.w).toFixed(3)}`, pL+6, h2-pB+16);
+  update();
 }
 
-function resetGD(){
-  if(state.timer){clearInterval(state.timer);state.timer=null;}
-  state={w:-2.8, trail:[], step:0, timer:null};
-  document.getElementById('step-info').textContent='';
-  draw();
+function fmt(v) { return parseFloat(v).toFixed(2); }
+
+function update() {
+  const x1   = +document.getElementById('x1').value;
+  const x2   = +document.getElementById('x2').value;
+  const w1   = +document.getElementById('w1').value;
+  const w2   = +document.getElementById('w2').value;
+  const b    = +document.getElementById('bias').value;
+
+  // 更新显示值
+  document.getElementById('v-x1').textContent = fmt(x1);
+  document.getElementById('v-x2').textContent = fmt(x2);
+  document.getElementById('v-w1').textContent = fmt(w1);
+  document.getElementById('v-w2').textContent = fmt(w2);
+  document.getElementById('v-b').textContent  = fmt(b);
+
+  // 计算
+  const z = w1 * x1 + w2 * x2 + b;
+  const a = applyAct(z);
+
+  // 更新 SVG 标签
+  document.getElementById('lbl-x1v').textContent = fmt(x1);
+  document.getElementById('lbl-x2v').textContent = fmt(x2);
+  document.getElementById('lbl-w1').textContent  = 'w₁=' + fmt(w1);
+  document.getElementById('lbl-w2').textContent  = 'w₂=' + fmt(w2);
+  document.getElementById('lbl-b').textContent   = 'b = ' + fmt(b);
+  document.getElementById('lbl-z').textContent   = 'z = ' + fmt(z);
+  document.getElementById('lbl-act').textContent = act + '(z)';
+  document.getElementById('lbl-out-svg').textContent = a.toFixed(3);
+
+  // 输出大字
+  document.getElementById('out-big').textContent = a.toFixed(3);
+
+  // 公式行
+  document.getElementById('f-z').textContent =
+    `z = ${fmt(w1)}×${fmt(x1)} + ${fmt(w2)}×${fmt(x2)} + ${fmt(b)} = ${fmt(z)}`;
+  document.getElementById('f-a').textContent =
+    `a = ${act}(${fmt(z)}) = ${a.toFixed(4)}`;
 }
 
-function stepGD(){
-  const lr=+document.getElementById('lr').value;
-  if(Math.abs(grad(state.w))<0.002){ document.getElementById('step-info').textContent='已收敛 ✓'; return; }
-  state.trail.push({w:state.w, l:loss(state.w)});
-  state.w = Math.max(-1, Math.min(4, state.w - lr*grad(state.w)));
-  state.step++;
-  document.getElementById('step-info').textContent=`步数: ${state.step}`;
-  draw();
-}
-
-function runGD(){
-  if(state.timer){clearInterval(state.timer);state.timer=null;return;}
-  state.timer=setInterval(()=>{
-    if(Math.abs(grad(state.w))<0.002){
-      clearInterval(state.timer);state.timer=null;
-      document.getElementById('step-info').textContent=`收敛！步数: ${state.step}`;
-      return;
-    }
-    stepGD();
-  },120);
-}
-
-document.getElementById('lr').addEventListener('input',function(){
-  document.getElementById('v-lr').textContent=(+this.value).toFixed(2);
+['x1','x2','w1','w2','bias'].forEach(id => {
+  document.getElementById(id).addEventListener('input', update);
 });
 
-window.addEventListener('resize',resize);
-resize();
+update();
 </script>
 </body>
 </html>
