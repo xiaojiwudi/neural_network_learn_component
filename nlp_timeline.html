@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NLP 发展时间线</title>
+<style>
+:root{
+  --bg:#ffffff; --bg2:#f5f4f0; --bg3:#eeedea;
+  --tx:#1a1a18; --tx2:#6b6a65;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --bg-info:#e6f1fb; --tx-info:#0c447c;
+  --bg-warning:#faeeda; --tx-warning:#633806;
+  --bg-danger:#fcebeb; --tx-danger:#791f1f;
+  --bg-success:#e1f5ee; --tx-success:#085041;
+  --bg-sec:#f5f4f0; --tx-sec:#6b6a65;
+  --r:10px; --font:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#1c1c1a; --bg2:#262624; --bg3:#2e2e2c;
+    --tx:#eeecea; --tx2:#9c9a92;
+    --border:rgba(255,255,255,0.10); --border2:rgba(255,255,255,0.20);
+    --bg-info:#0c2540; --tx-info:#85b7eb;
+    --bg-warning:#2e1c03; --tx-warning:#fac775;
+    --bg-danger:#2e0f0f; --tx-danger:#f09595;
+    --bg-success:#042c1e; --tx-success:#5dcaa5;
+    --bg-sec:#242422; --tx-sec:#9c9a92;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--bg);color:var(--tx);padding:24px 20px 40px;max-width:720px;margin:0 auto;}
+h1{font-size:17px;font-weight:500;margin-bottom:4px;}
+.sub{font-size:13px;color:var(--tx2);margin-bottom:20px;line-height:1.6;}
+.nav{display:flex;overflow-x:auto;gap:0;border-radius:var(--r);border:0.5px solid var(--border);margin-bottom:18px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.nav::-webkit-scrollbar{display:none;}
+.nav-btn{flex:0 0 auto;padding:10px 10px;font-size:11px;text-align:center;border:none;background:transparent;color:var(--tx2);cursor:pointer;border-right:0.5px solid var(--border);font-family:var(--font);line-height:1.3;transition:background .12s;}
+.nav-btn:last-child{border-right:none;}
+.nav-btn.active{background:var(--bg2);color:var(--tx);font-weight:500;}
+.nav-btn .yr{display:block;font-size:12px;font-weight:500;margin-bottom:1px;}
+.card{background:var(--bg2);border-radius:var(--r);border:0.5px solid var(--border);padding:18px 20px;}
+.card-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.card-year{font-size:13px;color:var(--tx2);}
+.card-name{font-size:19px;font-weight:500;}
+.badge{font-size:11px;padding:2px 10px;border-radius:20px;font-weight:500;}
+.body-text{font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:12px;}
+.body-text strong{color:var(--tx);font-weight:500;}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.stat{background:var(--bg3);border-radius:8px;padding:10px 12px;}
+.stat-l{font-size:11px;color:var(--tx2);margin-bottom:2px;}
+.stat-v{font-size:13px;font-weight:500;}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.tag{font-size:12px;padding:3px 10px;border-radius:20px;background:var(--bg3);color:var(--tx2);border:0.5px solid var(--border);}
+.arch{display:flex;gap:3px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+.arch-blk{height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;white-space:nowrap;padding:0 7px;}
+.verdict{font-size:13px;color:var(--tx2);border-top:0.5px solid var(--border);padding-top:12px;line-height:1.7;}
+.section-label{font-size:11px;color:var(--tx2);margin-bottom:6px;margin-top:12px;}
+.btn-row{display:flex;gap:8px;margin-top:14px;}
+button.nav2{padding:6px 16px;font-size:13px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--tx);cursor:pointer;font-family:var(--font);}
+</style>
+</head>
+<body>
+<h1>NLP 发展重大节点</h1>
+<p class="sub">从 N-gram 统计到 GPT-4 多模态，语言模型三十年的核心突破。</p>
+
+<div class="nav" id="nav"></div>
+<div class="card" id="card"></div>
+<div class="btn-row">
+  <button class="nav2" onclick="go(-1)">← 上一个</button>
+  <button class="nav2" onclick="go(1)">下一个 →</button>
+</div>
+
+<script>
+const nodes=[
+  {year:'~2000s',name:'N-gram 语言模型',tag:'统计时代',tagBg:'var(--bg-sec)',tagTx:'var(--tx-sec)',
+   problem:'怎么让计算机预测下一个词？最早的答案是纯粹统计：数语料里词的共现频率。',
+   insight:'给定前 N-1 个词，预测下一个词的概率：<strong>P(wₙ | wₙ₋₁,…)</strong>。用极大似然从语料库估计。简单可解释，但记忆窗口极短（N≤5），无法理解词义。',
+   stats:[{l:'上下文窗口',v:'3~5 个词'},{l:'词汇理解',v:'无'},{l:'长距依赖',v:'不支持'}],
+   tags:['条件概率统计','平滑处理','回退（Backoff）','Kneser-Ney平滑'],
+   arch:[{t:'语料统计',c:'#B4B2A9',w:72},{t:'N-gram表',c:'#888780',w:72},{t:'概率查表',c:'#5F5E5A',w:72},{t:'预测输出',c:'#444441',w:72}],
+   verdict:'统治 NLP 二十年，搜索引擎、输入法、语音识别的基础。核心局限：词是孤立符号，没有语义。'},
+  {year:'2013',name:'Word2Vec',tag:'语义觉醒',tagBg:'var(--bg-info)',tagTx:'var(--tx-info)',
+   problem:'词和词之间的语义关系（同义词、类比关系）如何用数学表达？符号无法做运算。',
+   insight:'把每个词映射成一个<strong>稠密向量（词嵌入）</strong>，训练目标是让上下文相似的词向量相近。神奇的涌现：<strong>king − man + woman ≈ queen</strong>。',
+   stats:[{l:'向量维度',v:'100~300维'},{l:'词表大小',v:'百万级'},{l:'训练目标',v:'预测上下文'}],
+   tags:['分布式词表示','CBOW / Skip-gram','负采样训练','语义算术运算'],
+   arch:[{t:'One-hot输入',c:'#B5D4F4',w:72},{t:'嵌入矩阵W',c:'#378ADD',w:72},{t:'隐藏向量',c:'#185FA5',w:72},{t:'上下文预测',c:'#0C447C',w:72}],
+   verdict:'开创"预训练词向量"时代，但每个词只有一个向量——多义词问题无解（"bank"的语义始终相同）。'},
+  {year:'2014–17',name:'Seq2Seq + 注意力',tag:'编解码框架',tagBg:'var(--bg-sec)',tagTx:'var(--tx-sec)',
+   problem:'机器翻译：把变长序列映射到变长序列，固定向量是信息瓶颈，句子越长质量越差。',
+   insight:'<strong>注意力机制</strong>（Bahdanau 2015）：解码每个词时，动态查询编码器的全部隐藏状态加权聚合，得到当步专属的上下文向量 cₜ = Σ αⱼhⱼ。',
+   stats:[{l:'架构',v:'RNN Enc-Dec'},{l:'创新点',v:'注意力机制'},{l:'应用',v:'翻译/摘要/对话'}],
+   tags:['Encoder-Decoder','Bahdanau注意力','对齐可视化','Beam Search'],
+   arch:[{t:'源句Tokens',c:'#9FE1CB',w:72},{t:'Encoder RNN',c:'#1D9E75',w:72},{t:'注意力',c:'#EF9F27',w:60},{t:'Decoder RNN',c:'#0F6E56',w:72},{t:'目标Tokens',c:'#085041',w:72}],
+   verdict:'机器翻译质量飞跃。注意力机制的引入是整个故事的转折点，Transformer 的直接前身。'},
+  {year:'2017',name:'Transformer',tag:'最大突破',tagBg:'var(--bg-danger)',tagTx:'var(--tx-danger)',
+   problem:'RNN 必须顺序处理（t 时刻依赖 t-1），无法并行；长序列梯度消失；训练极慢。',
+   insight:'<strong>完全抛弃 RNN</strong>，用纯自注意力处理序列，计算完全并行。三个核心矩阵 Q/K/V：Attention = softmax(QKᵀ/√d)·V。位置信息用位置编码注入。',
+   stats:[{l:'并行度',v:'完全并行'},{l:'上下文',v:'全序列O(n²)'},{l:'论文',v:'"Attention Is All You Need"'}],
+   tags:['自注意力','多头注意力','位置编码','Feed-Forward层','Layer Norm'],
+   arch:[{t:'Input Embedding',c:'#AFA9EC',w:88},{t:'Multi-Head Attn',c:'#7F77DD',w:88},{t:'FFN',c:'#534AB7',w:60},{t:'×N层',c:'#3C3489',w:52},{t:'Linear+Softmax',c:'#D3D1C7',w:88}],
+   verdict:'彻底改变了 NLP，随后改变了视觉、语音、蛋白质结构预测……Google 的 8 页论文，重塑了整个行业。'},
+  {year:'2018',name:'BERT',tag:'双向预训练',tagBg:'var(--bg-info)',tagTx:'var(--tx-info)',
+   problem:'Transformer 解码器是单向的，但理解一个词往往需要同时看左右上下文（"bank"的多义问题）。',
+   insight:'用 Transformer <strong>编码器</strong>，双向同时看全句。预训练：<strong>Masked LM</strong>（遮住 15% 的词预测）+ Next Sentence Prediction。预训练后微调。',
+   stats:[{l:'参数量',v:'1.1亿（Base）'},{l:'预训练数据',v:'33亿词'},{l:'11项NLP任务',v:'全部刷新SOTA'}],
+   tags:['双向Transformer','Masked Language Model','[CLS]分类token','预训练+微调范式'],
+   arch:[{t:'[CLS]+Tokens',c:'#B5D4F4',w:80},{t:'双向Transformer×12',c:'#378ADD',w:112},{t:'[CLS]向量',c:'#185FA5',w:72},{t:'微调头',c:'#D3D1C7',w:60}],
+   verdict:'"预训练+微调"成为 NLP 新范式，BERT 是语言版的 ImageNet 时刻。'},
+  {year:'2018–20',name:'GPT 系列（1/2/3）',tag:'生成式路线',tagBg:'var(--bg-warning)',tagTx:'var(--tx-warning)',
+   problem:'BERT 擅长理解，不擅长生成。能否用预训练思路训出一个能写文章、写代码、做推理的模型？',
+   insight:'用 Transformer <strong>解码器</strong>（单向自回归），预训练极简：<strong>预测下一个词</strong>。GPT-3 推到 1750 亿参数，涌现"In-context 学习"：仅凭提示词完成翻译、问答、写代码。',
+   stats:[{l:'GPT-3参数量',v:'1750亿'},{l:'训练Token数',v:'3000亿'},{l:'Few-shot',v:'无需微调'}],
+   tags:['自回归语言模型','In-context学习','Few/Zero-shot','规模涌现能力'],
+   arch:[{t:'Prompt Tokens',c:'#FAC775',w:80},{t:'因果Attn×96层',c:'#EF9F27',w:100},{t:'下一词预测',c:'#BA7517',w:80},{t:'自回归循环',c:'#854F0B',w:80}],
+   verdict:'GPT-3 是第一个让所有人意识到"大模型能做通用任务"的模型，直接催生了 ChatGPT。'},
+  {year:'2022',name:'ChatGPT / InstructGPT',tag:'对齐革命',tagBg:'var(--bg-success)',tagTx:'var(--tx-success)',
+   problem:'GPT-3 很强，但它预测"语料库里的下一个词"，而非"人类想要的回答"——会胡说、会有害。',
+   insight:'<strong>RLHF（人类反馈强化学习）</strong>：人工标注写出理想回答（SFT 监督微调），再让人类对回答排序训练奖励模型，最后用 PPO 强化学习最大化奖励。',
+   stats:[{l:'用户数',v:'2个月破亿'},{l:'核心技术',v:'RLHF'},{l:'基础模型',v:'GPT-3.5'}],
+   tags:['RLHF对齐','SFT监督微调','奖励模型','PPO强化学习','对话范式'],
+   arch:[{t:'GPT基础模型',c:'#C0DD97',w:80},{t:'SFT微调',c:'#97C459',w:72},{t:'奖励模型RM',c:'#639922',w:80},{t:'PPO优化',c:'#3B6D11',w:72},{t:'对齐模型',c:'#27500A',w:72}],
+   verdict:'AI 历史上用户增长最快的产品。让模型变得"有用、无害、诚实"的工程里程碑，引爆全球大模型竞赛。'},
+  {year:'2023+',name:'GPT-4 / 多模态大模型',tag:'通用智能边界',tagBg:'var(--bg-danger)',tagTx:'var(--tx-danger)',
+   problem:'文字不够——人类交流还有图片、语音、代码……单一模态的模型能力有天花板。',
+   insight:'把图像编码器（ViT）、语音编码器的输出<strong>对齐到同一语义空间</strong>，统一送入 Transformer 解码器。同期 <strong>MoE（混合专家）</strong>让参数量暴增而推理成本不变。',
+   stats:[{l:'上下文',v:'128K tokens'},{l:'架构推测',v:'MoE ~1.8万亿参数'},{l:'通过',v:'律师/医师资格考试'}],
+   tags:['视觉-语言对齐','Mixture of Experts','长上下文','工具调用','推理能力'],
+   arch:[{t:'图像/文字/代码',c:'#F0997B',w:88},{t:'模态编码器',c:'#D85A30',w:80},{t:'统一Transformer',c:'#993C1D',w:88},{t:'MoE路由',c:'#712B13',w:72},{t:'多模态输出',c:'#4A1B0C',w:80}],
+   verdict:'语言和视觉的边界正在消失。当前前沿：更长上下文、更强推理（链式思维）、Agent 自主行动。下一个节点，还在写。'},
+];
+
+let cur=0;
+
+function renderNav(){
+  document.getElementById('nav').innerHTML=nodes.map((n,i)=>
+    `<button class="nav-btn${i===cur?' active':''}" onclick="jump(${i})"><span class="yr">${n.year.split('–')[0].split('~')[0]}</span>${n.name.split(' ')[0]}</button>`
+  ).join('');
+}
+
+function renderCard(){
+  const n=nodes[cur];
+  const archHtml=n.arch.map(b=>
+    `<div class="arch-blk" style="width:${b.w}px;background:${b.c}22;border:1px solid ${b.c}60;color:${b.c}">${b.t}</div>`
+  ).join('');
+  const statsHtml=n.stats.map(s=>
+    `<div class="stat"><div class="stat-l">${s.l}</div><div class="stat-v">${s.v}</div></div>`
+  ).join('');
+  const tagsHtml=n.tags.map(t=>`<span class="tag">${t}</span>`).join('');
+  document.getElementById('card').innerHTML=`
+    <div class="card-head">
+      <span class="card-year">${n.year}</span>
+      <span class="card-name">${n.name}</span>
+      <span class="badge" style="background:${n.tagBg};color:${n.tagTx}">${n.tag}</span>
+    </div>
+    <div class="body-text"><strong>解决了什么：</strong>${n.problem}</div>
+    <div class="body-text"><strong>核心创新：</strong>${n.insight}</div>
+    <div class="stats">${statsHtml}</div>
+    <div class="section-label">关键技术</div>
+    <div class="tags">${tagsHtml}</div>
+    <div class="section-label">架构示意</div>
+    <div class="arch">${archHtml}</div>
+    <div class="verdict">${n.verdict}</div>
+  `;
+}
+
+function jump(i){cur=i;renderNav();renderCard();}
+function go(d){cur=(cur+d+nodes.length)%nodes.length;renderNav();renderCard();}
+renderNav();renderCard();
+</script>
+</body>
+</html>
