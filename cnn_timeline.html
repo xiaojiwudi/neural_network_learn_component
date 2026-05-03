@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CNN 发展时间线</title>
+<style>
+:root{
+  --bg:#ffffff; --bg2:#f5f4f0; --bg3:#eeedea;
+  --tx:#1a1a18; --tx2:#6b6a65;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.22);
+  --bg-info:#e6f1fb; --tx-info:#0c447c;
+  --bg-warning:#faeeda; --tx-warning:#633806;
+  --bg-danger:#fcebeb; --tx-danger:#791f1f;
+  --bg-success:#e1f5ee; --tx-success:#085041;
+  --bg-sec:#f5f4f0; --tx-sec:#6b6a65;
+  --r:10px; --font:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'Menlo','Monaco','Courier New',monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#1c1c1a; --bg2:#262624; --bg3:#2e2e2c;
+    --tx:#eeecea; --tx2:#9c9a92;
+    --border:rgba(255,255,255,0.10); --border2:rgba(255,255,255,0.20);
+    --bg-info:#0c2540; --tx-info:#85b7eb;
+    --bg-warning:#2e1c03; --tx-warning:#fac775;
+    --bg-danger:#2e0f0f; --tx-danger:#f09595;
+    --bg-success:#042c1e; --tx-success:#5dcaa5;
+    --bg-sec:#242422; --tx-sec:#9c9a92;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--bg);color:var(--tx);padding:24px 20px 40px;max-width:720px;margin:0 auto;}
+h1{font-size:17px;font-weight:500;margin-bottom:4px;}
+.sub{font-size:13px;color:var(--tx2);margin-bottom:20px;line-height:1.6;}
+.nav{display:flex;overflow-x:auto;gap:0;border-radius:var(--r);border:0.5px solid var(--border);margin-bottom:18px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.nav::-webkit-scrollbar{display:none;}
+.nav-btn{flex:0 0 auto;padding:10px 12px;font-size:11px;text-align:center;border:none;background:transparent;color:var(--tx2);cursor:pointer;border-right:0.5px solid var(--border);font-family:var(--font);line-height:1.3;transition:background .12s;}
+.nav-btn:last-child{border-right:none;}
+.nav-btn.active{background:var(--bg2);color:var(--tx);font-weight:500;}
+.nav-btn .yr{display:block;font-size:13px;font-weight:500;margin-bottom:1px;}
+.card{background:var(--bg2);border-radius:var(--r);border:0.5px solid var(--border);padding:18px 20px;}
+.card-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.card-year{font-size:13px;color:var(--tx2);}
+.card-name{font-size:20px;font-weight:500;}
+.badge{font-size:11px;padding:2px 10px;border-radius:20px;font-weight:500;}
+.section-label{font-size:11px;color:var(--tx2);margin-bottom:6px;margin-top:12px;}
+.body-text{font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:12px;}
+.body-text strong{color:var(--tx);font-weight:500;}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.stat{background:var(--bg3);border-radius:8px;padding:10px 12px;}
+.stat-l{font-size:11px;color:var(--tx2);margin-bottom:2px;}
+.stat-v{font-size:14px;font-weight:500;}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.tag{font-size:12px;padding:3px 10px;border-radius:20px;background:var(--bg3);color:var(--tx2);border:0.5px solid var(--border);}
+.arch{display:flex;gap:3px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+.arch-blk{height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;white-space:nowrap;padding:0 7px;}
+.verdict{font-size:13px;color:var(--tx2);border-top:0.5px solid var(--border);padding-top:12px;line-height:1.7;}
+.btn-row{display:flex;gap:8px;margin-top:14px;}
+button.nav2{padding:6px 16px;font-size:13px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--tx);cursor:pointer;font-family:var(--font);}
+</style>
+</head>
+<body>
+<h1>CNN 发展重大节点</h1>
+<p class="sub">从 1998 年 LeNet 到 2021 年 ViT，三十年视觉深度学习的关键突破。</p>
+
+<div class="nav" id="nav"></div>
+<div class="card" id="card"></div>
+<div class="btn-row">
+  <button class="nav2" onclick="go(-1)">← 上一个</button>
+  <button class="nav2" onclick="go(1)">下一个 →</button>
+</div>
+
+<script>
+const nodes=[
+  {year:'1998',name:'LeNet-5',tag:'奠基者',tagBg:'var(--bg-info)',tagTx:'var(--tx-info)',
+   problem:'手写数字识别，神经网络还很小众，计算资源极度匮乏。',
+   insight:'<strong>卷积层 + 池化层</strong>的组合首次系统化提出。局部感受野让网络专注于图像局部，权重共享大幅减少参数量。',
+   stats:[{l:'层数',v:'7层'},{l:'参数量',v:'6万'},{l:'ImageNet',v:'—'}],
+   tags:['卷积层','平均池化','Sigmoid激活','全连接分类头'],
+   arch:[{t:'Conv',c:'#AFA9EC',w:52},{t:'Pool',c:'#CECBF6',w:44},{t:'Conv',c:'#AFA9EC',w:52},{t:'Pool',c:'#CECBF6',w:44},{t:'FC×2',c:'#D3D1C7',w:52}],
+   verdict:'证明了 CNN 可以端到端学习视觉特征，但受限于硬件，14 年后才被真正激活。'},
+  {year:'2012',name:'AlexNet',tag:'深度学习元年',tagBg:'var(--bg-warning)',tagTx:'var(--tx-warning)',
+   problem:'ImageNet 100 万张图、1000 类别，传统方法已触顶。',
+   insight:'网络加深到 8 层，用 <strong>ReLU 替代 Sigmoid</strong>（解决梯度消失），引入 <strong>Dropout 防过拟合</strong>，首次用 GPU 训练（双 GTX580 并行）。',
+   stats:[{l:'层数',v:'8层'},{l:'参数量',v:'6千万'},{l:'Top-5错误率',v:'15.3%'}],
+   tags:['ReLU激活','GPU训练','Dropout','数据增强','LRN归一化'],
+   arch:[{t:'Conv×5',c:'#AFA9EC',w:72},{t:'MaxPool',c:'#CECBF6',w:52},{t:'FC',c:'#D3D1C7',w:40},{t:'Dropout',c:'#F5C4B3',w:52},{t:'Softmax',c:'#9FE1CB',w:52}],
+   verdict:'比第二名低 10 个百分点，震惊学界。深度学习大爆炸从此开始。'},
+  {year:'2014',name:'VGGNet',tag:'深度探索',tagBg:'var(--bg-sec)',tagTx:'var(--tx-sec)',
+   problem:'AlexNet 用大卷积核（11×11），设计不统一，难以系统研究深度的作用。',
+   insight:'用 <strong>3×3 小卷积核</strong>堆叠代替大卷积核：两个 3×3 感受野等于一个 5×5，但参数更少、非线性更多。结论：<strong>网络深度是性能关键</strong>。',
+   stats:[{l:'层数',v:'16–19层'},{l:'参数量',v:'1.38亿'},{l:'Top-5错误率',v:'7.3%'}],
+   tags:['3×3小卷积核','统一设计准则','深度vs宽度研究'],
+   arch:[{t:'Conv3×3×2',c:'#AFA9EC',w:80},{t:'Pool',c:'#CECBF6',w:40},{t:'Conv3×3×3',c:'#AFA9EC',w:80},{t:'Pool',c:'#CECBF6',w:40},{t:'FC×3',c:'#D3D1C7',w:44}],
+   verdict:'设计极简优雅，至今仍是迁移学习的热门 backbone，但参数量庞大是硬伤。'},
+  {year:'2014',name:'GoogLeNet / Inception',tag:'宽度创新',tagBg:'var(--bg-sec)',tagTx:'var(--tx-sec)',
+   problem:'更深不等于更好，参数量爆炸，如何在有限算力下做得更好？',
+   insight:'<strong>Inception 模块</strong>：同一层同时用 1×1、3×3、5×5 卷积并联，让网络自己选择滤波器尺度。<strong>1×1 卷积做降维</strong>，大幅压缩参数量。',
+   stats:[{l:'层数',v:'22层'},{l:'参数量',v:'500万'},{l:'Top-5错误率',v:'6.7%'}],
+   tags:['Inception模块','1×1卷积降维','多尺度并联','辅助分类器'],
+   arch:[{t:'Conv',c:'#AFA9EC',w:44},{t:'Inception×9',c:'#7F77DD',w:88},{t:'AvgPool',c:'#CECBF6',w:52},{t:'Dropout',c:'#F5C4B3',w:52},{t:'Softmax',c:'#9FE1CB',w:52}],
+   verdict:'参数量只有 AlexNet 的 1/12，性能却更强。证明网络设计比堆参数更重要。'},
+  {year:'2015',name:'ResNet',tag:'最大突破',tagBg:'var(--bg-danger)',tagTx:'var(--tx-danger)',
+   problem:'网络越深训练越难——152 层的网络比 20 层还差，"退化问题"让加深毫无意义。',
+   insight:'<strong>残差连接（Skip Connection）</strong>：让输入直接跳过几层，和输出相加。网络学的是残差 F(x)=H(x)−x，梯度可以畅通无阻地反向传播到最深处。',
+   stats:[{l:'层数',v:'152层'},{l:'参数量',v:'2500万'},{l:'Top-5错误率',v:'3.57%'}],
+   tags:['残差连接','BatchNorm','恒等映射','超越人类(5.1%)'],
+   arch:[{t:'Conv',c:'#AFA9EC',w:44},{t:'残差块×16',c:'#E24B4A',w:80},{t:'残差块×16',c:'#D85A30',w:80},{t:'残差块×8',c:'#EF9F27',w:72},{t:'AvgPool',c:'#CECBF6',w:48},{t:'FC',c:'#D3D1C7',w:36}],
+   verdict:'首次超越人类水平。残差连接是深度学习史上最重要的设计之一，影响延续至今（包括 Transformer）。'},
+  {year:'2017',name:'DenseNet',tag:'连接极致',tagBg:'var(--bg-sec)',tagTx:'var(--tx-sec)',
+   problem:'ResNet 只连相邻两层，信息利用还不够充分，能不能连得更密？',
+   insight:'<strong>密集连接</strong>：每一层直接接收前面所有层的输出（concat 而非相加）。特征被充分复用，梯度路径极多，参数效率极高。',
+   stats:[{l:'层数',v:'121–264层'},{l:'参数量',v:'800万'},{l:'CIFAR-10',v:'3.46%错误率'}],
+   tags:['全层密集连接','特征复用','Bottleneck结构','Transition层'],
+   arch:[{t:'Conv',c:'#AFA9EC',w:44},{t:'Dense Block',c:'#5DCAA5',w:72},{t:'Transition',c:'#CECBF6',w:56},{t:'Dense Block',c:'#1D9E75',w:72},{t:'FC',c:'#D3D1C7',w:36}],
+   verdict:'参数效率极高，但连接数随层数平方增长，内存开销大，工程落地受限。'},
+  {year:'2019',name:'EfficientNet',tag:'系统性扩展',tagBg:'var(--bg-success)',tagTx:'var(--tx-success)',
+   problem:'以前扩展网络靠直觉：只加深、只加宽、只提分辨率。三者如何同时最优地扩展？',
+   insight:'<strong>复合缩放（Compound Scaling）</strong>：用 NAS 找基础网络，再用统一系数 φ 同时按比例扩展深度、宽度、输入分辨率：d=αᵠ，w=βᵠ，r=γᵠ。',
+   stats:[{l:'Top-1精度',v:'84.3%'},{l:'参数量',v:'6600万'},{l:'vs ResNet-50',v:'精度高8.1%'}],
+   tags:['复合缩放法','NAS搜索','MBConv模块','SE注意力'],
+   arch:[{t:'Stem',c:'#AFA9EC',w:44},{t:'MBConv×16',c:'#1D9E75',w:80},{t:'MBConv×24',c:'#0F6E56',w:80},{t:'MBConv×40',c:'#085041',w:72},{t:'FC',c:'#D3D1C7',w:36}],
+   verdict:'以更少参数达到更高精度，开启"堆更聪明"而非"堆更多"的时代。'},
+  {year:'2020+',name:'Vision Transformer (ViT)',tag:'范式转变',tagBg:'var(--bg-info)',tagTx:'var(--tx-info)',
+   problem:'CNN 的归纳偏置（局部性、平移不变性）是强项也是约束，能否彻底抛弃卷积？',
+   insight:'把图像切成 <strong>16×16 的 patch</strong>，每个 patch 展平成"词向量"，直接用 <strong>Transformer 自注意力</strong>建模全局关系。完全无卷积，在大规模数据上超越 CNN。',
+   stats:[{l:'模型',v:'ViT-H/14'},{l:'ImageNet精度',v:'88.5%'},{l:'预训练数据',v:'3亿图片'}],
+   tags:['Patch Embedding','自注意力全局建模','无卷积归纳偏置','大数据驱动'],
+   arch:[{t:'Patch切分',c:'#AFA9EC',w:72},{t:'位置编码',c:'#CECBF6',w:60},{t:'Transformer×12',c:'#7F77DD',w:88},{t:'[CLS]',c:'#534AB7',w:52},{t:'MLP Head',c:'#D3D1C7',w:56}],
+   verdict:'CNN 统治视觉 10 年后，Transformer 入侵。SAM、CLIP、Stable Diffusion 均以此为基础。'},
+];
+
+let cur=0;
+
+function renderNav(){
+  document.getElementById('nav').innerHTML=nodes.map((n,i)=>
+    `<button class="nav-btn${i===cur?' active':''}" onclick="jump(${i})"><span class="yr">${n.year.split('+')[0]}</span>${n.name.split(' ')[0]}</button>`
+  ).join('');
+}
+
+function renderCard(){
+  const n=nodes[cur];
+  const archHtml=n.arch.map(b=>
+    `<div class="arch-blk" style="width:${b.w}px;background:${b.c}22;border:1px solid ${b.c}60;color:${b.c}">${b.t}</div>`
+  ).join('');
+  const statsHtml=n.stats.map(s=>
+    `<div class="stat"><div class="stat-l">${s.l}</div><div class="stat-v">${s.v}</div></div>`
+  ).join('');
+  const tagsHtml=n.tags.map(t=>`<span class="tag">${t}</span>`).join('');
+  document.getElementById('card').innerHTML=`
+    <div class="card-head">
+      <span class="card-year">${n.year}</span>
+      <span class="card-name">${n.name}</span>
+      <span class="badge" style="background:${n.tagBg};color:${n.tagTx}">${n.tag}</span>
+    </div>
+    <div class="body-text"><strong>解决了什么：</strong>${n.problem}</div>
+    <div class="body-text"><strong>核心创新：</strong>${n.insight}</div>
+    <div class="stats">${statsHtml}</div>
+    <div class="section-label">关键技术</div>
+    <div class="tags">${tagsHtml}</div>
+    <div class="section-label">架构示意</div>
+    <div class="arch">${archHtml}</div>
+    <div class="verdict">${n.verdict}</div>
+  `;
+}
+
+function jump(i){cur=i;renderNav();renderCard();}
+function go(d){cur=(cur+d+nodes.length)%nodes.length;renderNav();renderCard();}
+renderNav();renderCard();
+</script>
+</body>
+</html>
